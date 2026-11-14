@@ -1,0 +1,6 @@
+{
+  "name": "Browser Tester",
+  "description": "Authorized Chrome QA test configuration dashboard with SQLite persistence and a 127.0.0.1 local agent interface.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

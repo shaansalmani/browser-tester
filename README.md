@@ -1,91 +1,87 @@
 # Browser Tester
 
-**Browser Tester** is a web-based Quality Assurance (QA) dashboard paired with a local companion Chrome agent (`127.0.0.1`). It enables website owners and QA engineers to launch isolated Google Chrome sessions (Normal or Incognito), inspect page loading, execute controlled gradual scrolling with lazy-load detection, verify video player health, and review persisted SQLite test reports.
+Browser Tester is a local-first website QA dashboard with an isolated Chrome companion agent. Use it only on websites you own or are explicitly authorized to test. It is not a traffic generator and must not be used to create artificial views, watch time, ad impressions/clicks, or social engagement.
 
-> **Important Scope Notice**: Browser Tester is a **web application** with a separate local companion agent—not an Electron desktop app. It is strictly built for authorized QA testing on domains you own or hold explicit written permission to test. Artificial traffic, fake YouTube views/engagement, and ad interaction/clicks are strictly prohibited and blocked by architecture.
+## Requirements (Windows)
 
----
+- Windows 10/11 (64-bit)
+- Node.js 20.19+ (recommended: Node.js 22 LTS) and npm 10+
+- Google Chrome installed
+- Internet connection for the first dependency installation
 
-## Architecture Overview
+## Easiest way to run
 
-1. **Web Dashboard (`src/`)**: React + TypeScript + Vite + Tailwind CSS v4 SPA with dark/light themes, live session/scroll progress, history filtering, and a dedicated Test Reports view.
-2. **Backend API (`server.ts` + `server/`)**: Express + SQLite (`better-sqlite3`) backend handling input validation, SSRF/domain-allowlist enforcement, concurrency limits, rate limiting, and SQLite persistence.
-3. **Local Chrome Agent (`server/standaloneAgent.ts`)**: Node.js + Playwright companion running strictly on `127.0.0.1:47120` on your PC. Launches isolated Chrome contexts (without touching your personal Chrome profile, passwords, cookies, or history) and streams QA progress back to the dashboard.
+1. Extract the ZIP into a normal folder (do not run it from inside the ZIP).
+2. Double-click **Start Browser Tester.bat**.
+3. On first launch, it installs dependencies, starts the dashboard/backend, waits for its health check, starts the local Chrome Agent, and opens `http://127.0.0.1:3000`.
+4. Keep the two terminal windows open while using Browser Tester.
+5. To stop the app, press `Ctrl+C` in both terminal windows. You can also use **Stop Browser Tester.bat** for the instructions.
 
-See [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) and [SECURITY.md](./SECURITY.md) for detailed design and security documentation.
+Do not double-click `index.html`: it is only the frontend entry point and cannot start the Node.js backend.
 
----
+## Manual start (PowerShell)
 
-## Prerequisites
+Open PowerShell in the extracted project folder and run:
 
-- **Node.js** `v20+` (verified with Node `v22`) and **npm**
-- **Google Chrome** installed on the PC running the local agent (or `CHROME_EXECUTABLE_PATH` set in `.env`)
+```powershell
+npm.cmd install
+npm.cmd run dev
+```
 
----
+Open a second PowerShell window in the same folder and run:
 
-## Quick Start (Development)
+```powershell
+npm.cmd run agent
+```
 
-1. **Install dependencies** (and Playwright browser binaries if needed, though Browser Tester uses your installed Google Chrome executable):
-   ```bash
-   npm install
-   ```
+Then open `http://127.0.0.1:3000`. Using `npm.cmd` avoids the common PowerShell `npm.ps1` execution-policy error.
 
-2. **Configure environment variables**:
-   Copy `.env.example` to `.env` if you need custom settings (optional—sensible defaults and auto-generated local agent tokens are used automatically):
-   ```bash
-   cp .env.example .env
-   ```
+If you prefer to use `npm` rather than `npm.cmd` and PowerShell blocks scripts, you can allow locally installed scripts for your Windows user with:
 
-3. **Start the Web Dashboard & Express Backend** (port `3000`):
-   ```bash
-   npm run dev
-   ```
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
 
-4. **Start the Local Chrome Agent on your PC** (separate terminal, bound to `127.0.0.1:47120`):
-   ```bash
-   npm run agent
-   ```
+## Build checks
 
-5. Open `http://localhost:3000` in your browser, authorize a domain you own under **Authorized Domains**, confirm ownership, and run a QA session.
+```powershell
+npm.cmd install
+npm.cmd run lint
+npm.cmd run build
+```
 
----
+To serve the production build locally, set production mode and start the server:
 
-## Production Build & Startup
+```powershell
+$env:NODE_ENV = 'production'
+npm.cmd start
+```
 
-1. **Type-check & build static frontend assets (`dist/`)**:
-   ```bash
-   npm run lint
-   npm run build
-   ```
+## GitHub upload
 
-2. **Run production server** (serves `dist/` and API routes from Express on `PORT=3000`):
-   ```bash
-   npm start
-   ```
+GitHub stores the source code; it does not run the local backend or launch Chrome. Before pushing, make sure `.env`, `node_modules`, `dist`, and `data/` are not staged. They are excluded by `.gitignore`. Keep `.env.example` in the repository. This source package does not include an npm lockfile because package-registry access was unavailable during preparation; after the first successful `npm.cmd install` on your PC, keep the generated `package-lock.json` and commit it to GitHub for repeatable installs.
 
-3. **Run the Local Chrome Agent** on the workstation where Chrome windows should launch:
-   ```bash
-   npm run agent
-   ```
+The ZIP intentionally does not contain a `.git` folder. To update your existing GitHub repository, first clone it (or use your existing cloned working folder), then copy/overwrite these extracted project files into that clone **without deleting its `.git` folder**. In the cloned folder, run:
 
----
+```powershell
+git status
+git add .
+git commit -m "Prepare Browser Tester for local Windows use"
+git push origin main
+```
 
-## Environment Variables (`.env.example`)
+For a brand-new GitHub repository, create an empty repository on GitHub, then run `git init`, `git add .`, `git commit -m "Initial Browser Tester commit"`, `git branch -M main`, `git remote add origin YOUR_REPOSITORY_URL`, and `git push -u origin main`.
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `PORT` | `3000` | Express HTTP server port |
-| `AGENT_HOST` | `127.0.0.1` | Local agent bind address (enforced `127.0.0.1` only) |
-| `AGENT_PORT` | `47120` | Local agent HTTP port |
-| `SQLITE_DB_PATH` | `./data/browser-tester.db` | SQLite database file path |
-| `AGENT_AUTH_TOKEN` | Auto-generated in `data/.agent-token` | Shared secret token (`X-Agent-Token`) between Express and local agent |
-| `ALLOW_LOCAL_DEV_TARGETS` | `false` | Allows `localhost` / `127.0.0.1` QA targets when `true` (can also be toggled in UI Settings) |
-| `CHROME_EXECUTABLE_PATH` | Auto-detected | Optional explicit path to Chrome binary |
-| `DASHBOARD_CALLBACK_URL` | `http://127.0.0.1:3000` | Loopback callback URL used by local agent to post QA progress |
+## Security and supported testing
 
----
+- Add only domains you own or have written permission to test.
+- Automated tests are for authorized website QA, including page loading and scrolling.
+- **Manual Preview** opens one small popup window for a user-supplied HTTP(S) link. You control playback yourself; it does not autoplay, loop, refresh, or open multiple copies.
+- YouTube, Instagram, Facebook, TikTok, and other third-party social/video platforms remain blocked from automated playback testing.
+- Ad networks, private IP ranges, cloud metadata endpoints, and engagement-manipulation targets remain blocked.
+- The dashboard defaults to `127.0.0.1`; the Chrome Agent binds strictly to `127.0.0.1:47120`. Do not expose the agent port publicly.
+- Keep `.env`, `data/`, database files, authentication tokens, and personal browser profiles private.
 
-## Manual Testing
+## Cloud hosting limitation
 
-Please follow [MANUAL_TESTING_GUIDE.md](./MANUAL_TESTING_GUIDE.md) on your PC with Google Chrome installed to verify all interactive browser flows, Chrome launch modes, scroll behavior, video checks, and error states.
-# browser-tester
+`render.yaml` is included as a deployment template for the dashboard/API only. The Chrome Agent is intentionally loopback-only, so a cloud-hosted backend cannot launch Chrome on your personal PC. A secure outbound agent-to-cloud bridge is not included. For actual Chrome testing on your Windows PC, run the app locally with the Windows launcher.

@@ -16,7 +16,7 @@ Browser Tester is designed around strict authorization, process isolation, SSRF 
 ## 2. Domain Ownership & Acceptable QA Policy
 - **Explicit Allowlist**: `POST /api/tests` and `POST /api/tests/:id/retry` verify that the target URL's hostname matches an entry in the SQLite `authorized_domains` table and that the operator explicitly confirmed authorization.
 - **Prohibited Platforms & Abuse Vectors**:
-  - YouTube and third-party engagement-manipulation domains (`youtube.com`, `youtu.be`, `youtube-nocookie.com`) are rejected by both input validation and URL checks.
+  - Third-party social/video domains (`youtube.com`, `youtu.be`, `youtube-nocookie.com`, `instagram.com`, `facebook.com`, `fb.watch`, `tiktok.com`) are rejected by both input validation and URL checks. Manual Preview is a separate one-window, user-controlled action and does not automate playback.
   - Known advertising networks (`doubleclick.net`, `googlesyndication.com`, `googleadservices.com`, `adnxs.com`, `taboola.com`, `outbrain.com`, etc.) are blocked during domain validation and aborted at the Playwright network layer (`context.route`).
   - Abuse-oriented query/path keywords (`viewbot`, `fake-views`, `buy-views`, `ad-click`, `clickfarm`, `auto_subscribe`) are blocked.
 

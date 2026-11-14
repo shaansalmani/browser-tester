@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  ExternalLink,
   Lock,
   Play,
   RotateCcw,
@@ -58,13 +59,21 @@ function isClientRestrictedHost(hostname: string, allowLocalDevTargets: boolean)
     return 'Cloud metadata addresses are blocked.';
   }
 
+  const blockedSocialVideoDomains = [
+    'youtube.com',
+    'youtu.be',
+    'youtube-nocookie.com',
+    'instagram.com',
+    'facebook.com',
+    'fb.watch',
+    'tiktok.com',
+  ];
   if (
-    clean === 'youtube.com' ||
-    clean.endsWith('.youtube.com') ||
-    clean === 'youtu.be' ||
-    clean === 'youtube-nocookie.com'
+    blockedSocialVideoDomains.some(
+      (domain) => clean === domain || clean.endsWith(`.${domain}`)
+    )
   ) {
-    return 'YouTube and third-party video platform playback automation is prohibited.';
+    return 'Automated playback on YouTube, Instagram, Facebook, TikTok, and other third-party social/video platforms is prohibited.';
   }
 
   if ((isLoopback || isPrivateV4 || isRestrictedSuffix) && !(allowLocalDevTargets && isLoopback)) {
@@ -167,6 +176,35 @@ export function TestConfigForm({
     (selectedSessionForRetry.status === 'failed' ||
       selectedSessionForRetry.status === 'timed_out') &&
     selectedSessionForRetry.retryAttempt < limits.maxRetryAttempts;
+
+  function handleManualPreview() {
+    setLocalError(null);
+    let previewUrl: URL;
+    try {
+      previewUrl = new URL(url.trim());
+    } catch {
+      setLocalError('Enter a complete video or website URL beginning with http:// or https://.');
+      return;
+    }
+
+    if (previewUrl.protocol !== 'http:' && previewUrl.protocol !== 'https:') {
+      setLocalError('Manual Preview supports only http:// and https:// links.');
+      return;
+    }
+
+    // This is a user-controlled preview only: no autoplay, looping, refresh,
+    // quantity, or automated interaction is performed in this window.
+    const previewWindow = window.open(
+      previewUrl.href,
+      'browser-tester-manual-preview',
+      'popup=yes,width=900,height=560,resizable=yes,scrollbars=yes'
+    );
+    if (!previewWindow) {
+      setLocalError('Your browser blocked the preview popup. Allow popups for this local dashboard and try again.');
+      return;
+    }
+    previewWindow.focus();
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -621,6 +659,17 @@ export function TestConfigForm({
         )}
 
         <div className="flex flex-wrap items-center gap-3 pt-1">
+          <button
+            type="button"
+            disabled={!url.trim()}
+            onClick={handleManualPreview}
+            title="Open this link in one small, user-controlled preview window"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-150 whitespace-nowrap shrink-0 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            <span>Manual Preview</span>
+          </button>
+
           <button
             type="submit"
             disabled={submitting}

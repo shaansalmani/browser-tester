@@ -30,7 +30,7 @@ This guide walks you through verifying **Browser Tester** end-to-end on your loc
 
 ### 2. URL Validation & Authorized Domain Enforcement
 - Enter an invalid string (e.g., `not-a-url` or `ftp://example.com`) in **Target URL**. Verify inline validation blocks submission.
-- Enter a blocked platform URL (e.g., `https://www.youtube.com/watch?v=dQw4w9WgXcQ`) or ad domain (`https://doubleclick.net`). Verify it is rejected by policy.
+- Enter blocked platform URLs (YouTube, Instagram, Facebook, TikTok) or an ad domain (`https://doubleclick.net`). Verify automated test generation is rejected by policy. Use Manual Preview to open a single link only when you will control it yourself.
 - Enter a cloud metadata / private IP (e.g., `http://169.254.169.254` or `http://192.168.1.1`). Verify it is blocked.
 - Enter an authorized domain you own (e.g., `https://example.com` or your staging site) that is not yet in **Authorized Domains**. Verify the inline warning appears with an **Authorize ...** quick action, and verify **Generate** fails unless the domain is authorized and the ownership checkbox is checked.
 - Authorize the domain under **Authorized Domains** (checking `"I own or hold authorization for this domain"`). Confirm it persists across page reloads.

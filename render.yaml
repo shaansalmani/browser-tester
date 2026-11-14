@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: browser-tester
+    runtime: node
+    plan: starter
+    buildCommand: npm ci || npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: browser-tester-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: AGENT_HOST
+        value: 127.0.0.1
+      - key: SQLITE_DB_PATH
+        value: /opt/render/project/src/data/browser-tester.db
+      - key: AGENT_AUTH_TOKEN
+        generateValue: true
+      - key: ALLOW_LOCAL_DEV_TARGETS
+        value: "false"

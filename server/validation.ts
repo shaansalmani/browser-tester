@@ -30,6 +30,10 @@ const BLOCKED_ENGAGEMENT_MANIPULATION_DOMAINS = [
   'youtube.com',
   'youtu.be',
   'youtube-nocookie.com',
+  'instagram.com',
+  'facebook.com',
+  'fb.watch',
+  'tiktok.com',
 ];
 
 const BLOCKED_ABUSE_KEYWORDS = [
@@ -275,7 +279,7 @@ export function validateAuthorizedTestUrl(
       valid: false,
       statusCode: 403,
       error:
-        'YouTube and third-party video platform playback automation is prohibited. Test only authorized websites you own.',
+        'Automated playback on YouTube, Instagram, Facebook, TikTok, and other third-party social/video platforms is prohibited. Test only authorized websites you own.',
     };
   }
 

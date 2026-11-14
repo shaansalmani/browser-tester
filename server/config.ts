@@ -5,6 +5,16 @@ import type { QaScrollConfig } from '../src/types/testing.ts';
 
 export const SERVER_PORT = Number(process.env.PORT || 3000);
 
+// Bind to loopback for local use. Public binding must be explicitly enabled by
+// the hosting platform (for example, HOST=0.0.0.0 on Render in production).
+export const SERVER_HOST = (process.env.HOST || '127.0.0.1').trim();
+if (SERVER_HOST !== '127.0.0.1' && SERVER_HOST !== 'localhost' && SERVER_HOST !== '0.0.0.0') {
+  throw new Error(`Unsupported HOST value: ${SERVER_HOST}`);
+}
+if (SERVER_HOST === '0.0.0.0' && process.env.NODE_ENV !== 'production') {
+  throw new Error('Binding to 0.0.0.0 is allowed only in production.');
+}
+
 const configuredAgentHost = (process.env.AGENT_HOST || '127.0.0.1').trim();
 if (configuredAgentHost !== '127.0.0.1') {
   throw new Error(

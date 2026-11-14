@@ -10,6 +10,7 @@ import {
   HARD_MAX_ACTIVE_INSTANCES,
   HARD_MAX_QUANTITY_PER_SESSION,
   MAX_RETRY_ATTEMPTS,
+  SERVER_HOST,
   SERVER_PORT,
   getAgentAuthToken,
   verifyAgentAuthToken,
@@ -727,8 +728,9 @@ async function startServer(): Promise<void> {
     });
   }
 
-  app.listen(SERVER_PORT, '0.0.0.0', () => {
-    console.log(`[Browser Tester] Web dashboard listening on http://localhost:${SERVER_PORT}`);
+  app.listen(SERVER_PORT, SERVER_HOST, () => {
+    const displayHost = SERVER_HOST === '0.0.0.0' ? '0.0.0.0' : '127.0.0.1';
+    console.log(`[Browser Tester] Web dashboard listening on http://${displayHost}:${SERVER_PORT}`);
     console.log(
       `[Browser Tester] Expecting local Chrome agent strictly on http://${AGENT_HOST}:${AGENT_PORT}`
     );

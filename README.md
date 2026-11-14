@@ -88,3 +88,4 @@ See [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) and [SECURITY.md](./SEC
 ## Manual Testing
 
 Please follow [MANUAL_TESTING_GUIDE.md](./MANUAL_TESTING_GUIDE.md) on your PC with Google Chrome installed to verify all interactive browser flows, Chrome launch modes, scroll behavior, video checks, and error states.
+# browser-tester
